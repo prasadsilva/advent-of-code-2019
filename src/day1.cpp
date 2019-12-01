@@ -7,13 +7,24 @@
 
 namespace day1 {
 
-  long fuel_required(long mass) {
+  long get_fuel_required(long mass) {
     return (mass / 3) - 2;
   }
 
-  long total_fuel_required(const std::vector<int> &masses) {
-    return std::accumulate(masses.begin(), masses.end(), 0, [](long total, long mass) {
-      return total + fuel_required(mass);
+  long get_fuel_required_recursive(long mass) {
+    long total_fuel_required = 0;
+    long current_mass = mass;
+    while (current_mass > 0) {
+      auto fuel_required = std::max(get_fuel_required(current_mass), 0l);
+      total_fuel_required += fuel_required;
+      current_mass = fuel_required;
+    }
+    return total_fuel_required;
+  }
+
+  long get_total_fuel_required(const std::vector<int> &masses, std::function<long(long)> compute_fn) {
+    return std::accumulate(masses.begin(), masses.end(), 0, [compute_fn](long total, long mass) {
+      return total + compute_fn(mass);
     });
   }
 
@@ -27,14 +38,14 @@ namespace day1 {
     std::cout << "Day 1 - Problem 1" << std::endl;
 #if !defined(ONLY_ACTIVATE) || ONLY_ACTIVATE == 1
 
-    assert(fuel_required(12) == 2);
-    assert(fuel_required(14) == 2);
-    assert(fuel_required(1969) == 654);
-    assert(fuel_required(100756) == 33583);
+    assert(get_fuel_required(12) == 2);
+    assert(get_fuel_required(14) == 2);
+    assert(get_fuel_required(1969) == 654);
+    assert(get_fuel_required(100756) == 33583);
 
     std::vector<int> input;
     read_day1_data(input, "data/day1/problem1/input.txt");
-    std::cout << "Result : " << total_fuel_required(input) << std::endl;
+    std::cout << "Result : " << get_total_fuel_required(input, get_fuel_required) << std::endl;
 
 #endif
   }
@@ -43,25 +54,13 @@ namespace day1 {
     std::cout << "Day 1 - Problem 2" << std::endl;
 #if !defined(ONLY_ACTIVATE) || ONLY_ACTIVATE == 1
 
-//    std::vector<int> test1;
-//    read_day1_data(test1, "data/day1/problem2/test1.txt");
-//    assert(get_first_repeating_frequency(test1) == 0);
-//
-//    std::vector<int> test2;
-//    read_day1_data(test2, "data/day1/problem2/test2.txt");
-//    assert(get_first_repeating_frequency(test2) == 10);
-//
-//    std::vector<int> test3;
-//    read_day1_data(test3, "data/day1/problem2/test3.txt");
-//    assert(get_first_repeating_frequency(test3) == 5);
-//
-//    std::vector<int> test4;
-//    read_day1_data(test4, "data/day1/problem2/test4.txt");
-//    assert(get_first_repeating_frequency(test4) == 14);
-//
-//    std::vector<int> input;
-//    read_day1_data(input, "data/day1/problem2/input.txt");
-//    std::cout << "Result : " << get_first_repeating_frequency(input) << std::endl;
+    assert(get_fuel_required_recursive(14) == 2);
+    assert(get_fuel_required_recursive(1969) == 966);
+    assert(get_fuel_required_recursive(100756) == 50346);
+
+    std::vector<int> input;
+    read_day1_data(input, "data/day1/problem2/input.txt");
+    std::cout << "Result : " << get_total_fuel_required(input, get_fuel_required_recursive) << std::endl;
 
 #endif
   }
