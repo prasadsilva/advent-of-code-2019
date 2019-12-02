@@ -29,9 +29,9 @@ namespace day1 {
   }
 
   void read_day1_data(std::vector<int> &outdata, const char *filepath) {
-    std::ifstream inputStream(filepath);
-    std::istream_iterator<int> inputIterator(inputStream);
-    std::copy(inputIterator, std::istream_iterator<int>(), std::back_inserter(outdata));
+    std::ifstream input_stream(filepath);
+    std::istream_iterator<int> input_iterator(input_stream);
+    std::copy(input_iterator, std::istream_iterator<int>(), std::back_inserter(outdata));
   }
 
   void problem1() {
