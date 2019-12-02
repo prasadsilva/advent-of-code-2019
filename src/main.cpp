@@ -10,10 +10,12 @@
 
 // Forward declarations
 DECLARE_DAY(1);
+DECLARE_DAY(2);
 
 int main(int argc, char const *argv[]) {
   std::vector<std::vector<std::function<void(void)>>> days = {
     {day1::problem1,  day1::problem2},
+    {day2::problem1,  day2::problem2},
   };
 
   if (argc > 2) {
