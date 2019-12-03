@@ -6,6 +6,7 @@
 #include <numeric>
 #include <sstream>
 #include <regex>
+#include <math.h>
 
 namespace day3 {
 
@@ -56,6 +57,18 @@ namespace day3 {
       }
     }
   };
+
+  int get_distance_between(const point_t &p0, const point_t &p1) {
+    auto x1 = p0.first;
+    auto y1 = p0.second;
+    auto x2 = p1.first;
+    auto y2 = p1.second;
+    return sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
+  }
+
+  int get_length(const line_seg_t &segment) {
+    return get_distance_between(segment.first, segment.second);
+  }
 
   int get_manhattan_dist_from_origin(const point_t &point) {
     return std::abs(point.first) + std::abs(point.second);
@@ -136,6 +149,29 @@ namespace day3 {
     return closest_distance_to_intersection;
   }
 
+  int find_minimum_intersection_steps(const wire_t &wire1, const wire_t &wire2) {
+    int minimum_steps_to_intersection = std::numeric_limits<int>::max();
+    int wire1_steps = 0;
+    for (auto& wire1_segment : wire1.segments) {
+      int wire2_steps = 0;
+      for (auto &wire2_segment : wire2.segments) {
+        auto intersection_pt = find_intersection(wire1_segment, wire2_segment);
+        auto distance = get_manhattan_dist_from_origin(intersection_pt);
+        if (distance > 0) {
+          auto wire1_step_remainder = get_distance_between(wire1_segment.first, intersection_pt);
+          auto wire2_step_remainder = get_distance_between(wire2_segment.first, intersection_pt);
+          auto steps_to_intersection = (wire1_steps + wire1_step_remainder) + (wire2_steps + wire2_step_remainder);
+          if (steps_to_intersection < minimum_steps_to_intersection) {
+            minimum_steps_to_intersection = steps_to_intersection;
+          }
+        }
+        wire2_steps += get_length(wire2_segment);
+      }
+      wire1_steps += get_length(wire1_segment);
+    }
+    return minimum_steps_to_intersection;
+  }
+
   void read_data(std::vector<wire_t> &outdata, const char *filepath) {
     std::ifstream input_stream(filepath);
     std::string str;
@@ -173,6 +209,17 @@ namespace day3 {
   }
 
   void problem2() {
+    {
+      wire_t test1, test2;
+      test1.initialize("R8,U5,L5,D3");
+      test2.initialize("U7,R6,D4,L4");
+      assert(find_minimum_intersection_steps(test1, test2) == 30);
+    }
+
+    std::vector<wire_t> wires;
+    read_data(wires, "data/day3/problem2/input.txt");
+    std::cout << "Result : " << find_minimum_intersection_steps(wires[0], wires[1]) << std::endl;
+
 
   }
 

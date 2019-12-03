@@ -134,7 +134,7 @@ namespace day2 {
     int_code_program_state_t program_state;
     read_data(program_state.program_code, "data/day2/problem1/input.txt");
     program_state.set_1202_program_alarm();
-    program_state.run(true);
+    program_state.run();
     std::cout << "Result : " << program_state.program_code[0] << std::endl;
   }
 
