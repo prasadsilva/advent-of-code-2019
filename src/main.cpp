@@ -12,6 +12,12 @@
 DECLARE_DAY(1);
 DECLARE_DAY(2);
 
+void run_problem(int day, int problem, const std::function<void(void)>& logic) {
+  std::cout << "Day " << day << " - Problem " << problem << std::endl;
+  logic();
+  std::cout << "..Done\n" << std::endl;
+}
+
 int main(int argc, char const *argv[]) {
   std::vector<std::vector<std::function<void(void)>>> days = {
     {day1::problem1,  day1::problem2},
@@ -40,18 +46,20 @@ int main(int argc, char const *argv[]) {
   if (day_to_run != -1) {
     // Run a specific day
     auto &day_problems = days[day_to_run - 1];
-    std::cout << "Running day " << day_to_run << std::endl;
+    std::cout << "Running ONLY day " << day_to_run << std::endl << std::endl;
+    auto problem_num = 1;
     for (auto &problem : day_problems) {
-      problem();
-      std::cout << std::endl;
+      run_problem(day_to_run, problem_num++, problem);
     }
   } else {
     // Run all days
+    auto day_num = 1;
     for (auto &day_problems : days) {
+      auto problem_num = 1;
       for (auto &problem : day_problems) {
-        problem();
-        std::cout << std::endl;
+        run_problem(day_num, problem_num++, problem);
       }
+      day_num++;
     }
   }
 

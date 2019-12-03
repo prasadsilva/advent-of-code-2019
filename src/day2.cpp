@@ -90,7 +90,7 @@ namespace day2 {
 
   };
 
-  void read_day2_data(std::vector<long> &outdata, const char *filepath) {
+  void read_data(std::vector<long> &outdata, const char *filepath) {
     std::ifstream input_stream(filepath);
     while( input_stream.good() )
     {
@@ -101,9 +101,6 @@ namespace day2 {
   }
 
   void problem1() {
-    std::cout << "Day 2 - Problem 1" << std::endl;
-#if !defined(ONLY_ACTIVATE) || ONLY_ACTIVATE == 1
-
     {
       int_code_program_state_t test{{{1,9,10,3,2,3,11,0,99,30,40,50}}};
       test.run();
@@ -135,20 +132,15 @@ namespace day2 {
     }
 
     int_code_program_state_t program_state;
-    read_day2_data(program_state.program_code, "data/day2/problem1/input.txt");
+    read_data(program_state.program_code, "data/day2/problem1/input.txt");
     program_state.set_1202_program_alarm();
     program_state.run(true);
     std::cout << "Result : " << program_state.program_code[0] << std::endl;
-
-#endif
   }
 
   void problem2() {
-    std::cout << "Day 2 - Problem 2" << std::endl;
-#if !defined(ONLY_ACTIVATE) || ONLY_ACTIVATE == 1
-
     int_code_program_t program_code;
-    read_day2_data(program_code, "data/day2/problem2/input.txt");
+    read_data(program_code, "data/day2/problem2/input.txt");
     int_code_program_state_t program_state;
     for (int noun = 0; noun <= 99; noun++) {
       for (int verb = 0; verb <= 99; verb++) {
@@ -161,9 +153,7 @@ namespace day2 {
         }
       }
     }
-    std::cout << "Could not find value at address 0!" << std::endl;
-
-#endif
+    std::cout << "ERROR: Could not find value at address 0!" << std::endl;
   }
 
-}
+} // namespace day2
