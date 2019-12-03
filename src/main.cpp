@@ -11,6 +11,7 @@
 // Forward declarations
 DECLARE_DAY(1);
 DECLARE_DAY(2);
+DECLARE_DAY(3);
 
 void run_problem(int day, int problem, const std::function<void(void)>& logic) {
   std::cout << "Day " << day << " - Problem " << problem << std::endl;
@@ -22,6 +23,7 @@ int main(int argc, char const *argv[]) {
   std::vector<std::vector<std::function<void(void)>>> days = {
     {day1::problem1,  day1::problem2},
     {day2::problem1,  day2::problem2},
+    {day3::problem1,  day3::problem2},
   };
 
   if (argc > 2) {
