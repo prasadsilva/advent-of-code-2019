@@ -34,13 +34,13 @@ int main(int argc, char const *argv[]) {
     {day7::problem1,  day7::problem2},
   };
 
-  if (argc > 2) {
-    std::cerr << "ERROR: Specify no params or a day # to run a specific day" << std::endl;
+  if (argc > 3) {
+    std::cerr << "ERROR: Specify no params OR a day # to run a specific day OR day and problem number" << std::endl;
     return -1;
   }
 
   int day_to_run = -1;
-  if (argc == 2) {
+  if (argc >= 2) {
     try {
       day_to_run = std::stoi(argv[1]);
     } catch (...) {
@@ -53,13 +53,32 @@ int main(int argc, char const *argv[]) {
     }
   }
 
+  int problem_to_run = -1;
+  if (argc == 3 && day_to_run != -1) {
+    try {
+      problem_to_run = std::stoi(argv[2]);
+    } catch (...) {
+      std::cerr << "ERROR: Invalid parameter!" << std::endl;
+      return -4;
+    }
+    if (problem_to_run < 1 || problem_to_run > days[day_to_run - 1].size()) {
+      std::cerr << "ERROR: Problem parameter is invalid!" << std::endl;
+      return -5;
+    }
+  }
+
   if (day_to_run != -1) {
     // Run a specific day
     auto &day_problems = days[day_to_run - 1];
-    std::cout << "Running ONLY day " << day_to_run << std::endl << std::endl;
-    auto problem_num = 1;
-    for (auto &problem : day_problems) {
-      run_problem(day_to_run, problem_num++, problem);
+    if (problem_to_run != -1) {
+      std::cout << "Running ONLY day " << day_to_run << " ONLY problem " << problem_to_run << std::endl << std::endl;
+      run_problem(day_to_run, problem_to_run, day_problems[problem_to_run - 1]);
+    } else {
+      std::cout << "Running ONLY day " << day_to_run << std::endl << std::endl;
+      auto problem_num = 1;
+      for (auto &problem : day_problems) {
+        run_problem(day_to_run, problem_num++, problem);
+      }
     }
   } else {
     // Run all days
