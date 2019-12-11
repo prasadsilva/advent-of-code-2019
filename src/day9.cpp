@@ -306,7 +306,7 @@ namespace day9 {
   void problem2() {
     std::cout << "SENSOR BOOST MODE" << std::endl;
     int_code_program_state_t input;
-    read_data(input._program_code, "data/day9/problem1/input.txt");
+    read_data(input._program_code, "data/day9/problem2/input.txt");
     input.run(
         []() -> unit_t { return 2; },
         [](unit_t value) { std::cout << value << std::endl; }
