@@ -15,6 +15,7 @@ namespace day13 {
   using int_code_program_t = std::vector<unit_t>;
   using input_handler_t = std::function<unit_t(void)>;
   using output_handler_t = std::function<void(unit_t)>;
+  using exit_handler_t = std::function<bool(void)>;
 
   struct int_code_program_state_t {
     int_code_program_t _program_code;
@@ -85,7 +86,6 @@ namespace day13 {
         default: assert(0);
       }
       // Handle out of bounds
-      assert(address < 2048);
       if (address >= _program_code.size()) _program_code.resize(address + 1, 0);
       return _program_code[address];
     }
@@ -107,7 +107,6 @@ namespace day13 {
         default: assert(0);
       }
       // Handle out of bounds
-      assert(address < 2048);
       if (address >= _program_code.size()) _program_code.resize(address + 1, 0);
       _program_code[address] = value;
 
@@ -242,16 +241,15 @@ namespace day13 {
     void run(
         const input_handler_t &input_handler,
         const output_handler_t &output_handler,
-        bool break_on_output = false,
+        const exit_handler_t &exit_handler,
         bool trace = false
     ) {
       if (trace) {
         std::cout << "\nRunning program.." << std::endl;
         print_program_code();
       }
-      while (!_halted) {
-        auto output_occured = step(input_handler, output_handler, trace);
-        if (output_occured && break_on_output) return;
+      while (!_halted && !exit_handler()) {
+        step(input_handler, output_handler, trace);
       }
     }
   };
@@ -275,18 +273,78 @@ namespace day13 {
     TILE_BALL = 4,
   };
 
+  enum joystick_state_t {
+    JOY_NEUTRAL = 0,
+    JOY_LEFT = -1,
+    JOY_RIGHT = 1,
+  };
+
   using position_t = std::pair<unit_t, unit_t>;
-  using screen_t = std::map<position_t, unit_t>;
+  using tile_map_t = std::map<position_t, unit_t>;
 
   struct arcade_cabinet_t {
     int_code_program_state_t _program_state;
+    tile_map_t  _tile_map;
+    unit_t _score = 0;
+    unit_t _joystick_state = JOY_NEUTRAL;
 
-    void run_program(screen_t &screen) {
+    // For autoplay mode
+    position_t _ball_position = {-1, -1};
+    position_t _paddle_position = {-1, -1};
+
+    void render_screen() {
+      std::cout << std::endl << "SCORE: " << _score << std::endl;
+      // Find dimensions of message
+      unit_t min_x = std::numeric_limits<unit_t>::max(), max_x = std::numeric_limits<unit_t>::min();
+      unit_t min_y = std::numeric_limits<unit_t>::max(), max_y = std::numeric_limits<unit_t>::min();
+      for (const auto &[position, type] : _tile_map) {
+        auto &&[x, y] = position;
+        if (x < min_x) min_x = x;
+        if (x > max_x) max_x = x;
+        if (y < min_y) min_y = y;
+        if (y > max_y) max_y = y;
+      }
+      unit_t width = max_x - min_x + 1, height = max_y - min_y + 1;
+      std::vector<std::vector<unit_t>> painted_grid(height, std::vector<unit_t>(width, TILE_EMPTY));
+      // Mark painted positions
+      for (const auto &[position, type] : _tile_map) {
+        auto &&[x, y] = position;
+        painted_grid[y][x] = type;
+      }
+      // Print out grid
+      for (auto &row : painted_grid) {
+        for (auto &col : row) {
+          char val = 'X';
+          switch (col) {
+            case TILE_EMPTY: val = ' '; break;
+            case TILE_WALL: val = '#'; break;
+            case TILE_BLOCK: val = '%'; break;
+            case TILE_HORIZ_PADDLE: val = '='; break;
+            case TILE_BALL: val = '*'; break;
+            default: assert(0);
+          }
+          std::cout << val;
+        }
+        std::cout << std::endl;
+      }
+    }
+
+    void run_program() {
       std::queue<unit_t> outputs;
 
       _program_state.run([&]() -> unit_t {
-        assert(0);
-        return -1;
+        render_screen();
+
+        // Autoplay mode!
+        auto&& [ball_x, ball_y] = _ball_position;
+        auto&& [paddle_x, paddle_y] = _paddle_position;
+        if (ball_x != -1 && paddle_x != -1) {
+          if (paddle_x < ball_x) _joystick_state = JOY_RIGHT;
+          else if (paddle_x > ball_x) _joystick_state = JOY_LEFT;
+          else _joystick_state = JOY_NEUTRAL;
+        }
+
+        return _joystick_state;
       }, [&](unit_t value) {
         outputs.push(value);
         if (outputs.size() == 3) {
@@ -294,10 +352,20 @@ namespace day13 {
           outputs.pop();
           auto y = outputs.front();
           outputs.pop();
-          auto type = outputs.front();
-          outputs.pop();
-          screen[{x, y}] = type;
+          if (x == -1 && y == 0) {
+            _score = outputs.front();
+            outputs.pop();
+          } else {
+            auto type = outputs.front();
+            outputs.pop();
+            position_t position{x, y};
+            _tile_map[position] = type;
+            if (type == TILE_BALL) _ball_position = position;
+            else if (type == TILE_HORIZ_PADDLE) _paddle_position = position;
+          }
         }
+      }, [&]() -> bool {
+        return false;
       });
     }
   };
@@ -305,17 +373,15 @@ namespace day13 {
   void problem1() {
     arcade_cabinet_t arcade_cabinet;
     read_data(arcade_cabinet._program_state._program_code, "data/day13/problem1/input.txt");
-    screen_t screen;
-    arcade_cabinet.run_program(screen);
-    std::cout << "Result : " << std::count_if(screen.begin(), screen.end(), [](const auto &v) -> bool { return v.second == TILE_BLOCK; }) << std::endl;
+    arcade_cabinet.run_program();
+    std::cout << "Result : " << std::count_if(arcade_cabinet._tile_map.begin(), arcade_cabinet._tile_map.end(), [](const auto &v) -> bool { return v.second == TILE_BLOCK; }) << std::endl;
   }
 
   void problem2() {
-//    assert(get_fuel_required_recursive(14) == 2);
-
-//    std::vector<int> input;
-//    read_data(input, "data/day1/problem2/input.txt");
-//    std::cout << "Result : " << get_total_fuel_required(input, get_fuel_required_recursive) << std::endl;
+    arcade_cabinet_t arcade_cabinet;
+    read_data(arcade_cabinet._program_state._program_code, "data/day13/problem2/input.txt");
+    arcade_cabinet._program_state._program_code[0] = 2; // free play mode
+    arcade_cabinet.run_program();
   }
 
 } // namespace day1
