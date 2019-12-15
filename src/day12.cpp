@@ -11,14 +11,15 @@ namespace day12 {
 
   struct triple_t {
     unit_t _x, _y, _z;
+
+    bool operator == (const triple_t &other) const { return _x == other._x && _y == other._y && _z == other._z; }
   };
 
   struct moon_t {
-    unit_t    _id;
-    triple_t  _position;
+    triple_t  _position{0, 0, 0};
     triple_t  _velocity{0, 0, 0};
 
-    bool operator == (const moon_t &other) { return _id == other._id; }
+    bool operator == (const moon_t &other) const { return _position == other._position && _velocity == other._velocity; }
 
     friend std::istream &operator>>(std::istream &in, moon_t &moon) {
       // E.g.: <x=9, y=-4, z=14>
@@ -63,8 +64,7 @@ namespace day12 {
         }
       }
       // update the position of every moon by applying velocity
-      for (unit_t idx = 0; idx < _moons.size(); idx++) {
-        auto &moon = _moons[idx];
+      for (auto & moon : _moons) {
         moon._position._x += moon._velocity._x;
         moon._position._y += moon._velocity._y;
         moon._position._z += moon._velocity._z;
@@ -93,10 +93,10 @@ namespace day12 {
     {
       system_t system;
       system._moons = {
-          {0, {-1, 0, 2}},
-          {1, {2, -10, -7}},
-          {2, {4, -8, 8}},
-          {3, {3, 5, -1}}
+          {{-1, 0, 2}},
+          {{2, -10, -7}},
+          {{4, -8, 8}},
+          {{3, 5, -1}}
       };
       for (unit_t i = 0; i < 10; i++) {
         system.simulate();
@@ -113,6 +113,27 @@ namespace day12 {
   }
 
   void problem2() {
+    {
+      system_t system;
+      std::vector<moon_t> moons = {
+          {{-1, 0, 2}},
+          {{2, -10, -7}},
+          {{4, -8, 8}},
+          {{3, 5, -1}}
+      };
+      system._moons = moons;
+      unit_t last_initial_state_step[] = {0, 0, 0, 0};
+      for (unit_t step = 0; step < 10000; step++) {
+        system.simulate();
+        for (unit_t moon_idx = 0; moon_idx < moons.size(); moon_idx++) {
+          if (system._moons[moon_idx] == moons[moon_idx]) {
+            auto delta = step - last_initial_state_step[moon_idx];
+            std::cout << "Found initial state for moon " << moon_idx << " at step " << step << " (delta = " << delta << ")" << std::endl;
+            last_initial_state_step[moon_idx] = step;
+          }
+        }
+      }
+    }
 //    assert(get_fuel_required_recursive(14) == 2);
 
 //    std::vector<int> input;
