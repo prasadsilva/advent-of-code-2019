@@ -5,6 +5,7 @@
 #include <numeric>
 #include <map>
 #include <queue>
+#include <thread>
 
 namespace day13 {
 
@@ -293,6 +294,9 @@ namespace day13 {
     position_t _paddle_position = {-1, -1};
 
     void render_screen() {
+      // Uncomment the following lines to see playback with a human friendly refresh rate
+//      std::this_thread::sleep_for(std::chrono::milliseconds(150));
+//      std::cout << "\033[2J" << std::flush;
       std::cout << std::endl << "SCORE: " << _score << std::endl;
       // Find dimensions of message
       unit_t min_x = std::numeric_limits<unit_t>::max(), max_x = std::numeric_limits<unit_t>::min();
