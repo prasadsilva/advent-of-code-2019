@@ -441,6 +441,33 @@ namespace day15 {
     }
   };
 
+  unit_t get_duration_for_oxygen_dissipation(const position_t &initial_position, const std::map<position_t, unit_t> &position_types) {
+    auto position_map = position_types;
+    unit_t elapsed_minutes = 0;
+    std::queue<position_t> process_queue, next_process_queue;
+    next_process_queue.push(initial_position);
+    while (!next_process_queue.empty()) {
+      process_queue = next_process_queue;
+      next_process_queue = {};
+
+      while (!process_queue.empty()) {
+        auto&& [x, y] = process_queue.front();
+        process_queue.pop();
+        // Check 4 neighbors
+        std::vector<position_t> neighbors = {{ x - 1, y }, { x + 1, y }, { x, y - 1 }, { x, y + 1 }};
+        for (auto &neighbor : neighbors) {
+          if (position_map[neighbor] == TYPE_Moveable) {
+            position_map[neighbor] = TYPE_Oxygen;
+            next_process_queue.push(neighbor);
+          }
+        }
+      }
+
+      if (!next_process_queue.empty()) elapsed_minutes++;
+    }
+    return elapsed_minutes;
+  }
+
   void problem1() {
     remote_control_t remote_control;
     read_data(remote_control._program_state._program_code, "data/day15/problem1/input.txt");
@@ -448,11 +475,10 @@ namespace day15 {
   }
 
   void problem2() {
-//    assert(get_fuel_required_recursive(14) == 2);
-
-//    std::vector<int> input;
-//    read_data(input, "data/day1/problem2/input.txt");
-//    std::cout << "Result : " << get_total_fuel_required(input, get_fuel_required_recursive) << std::endl;
+    remote_control_t remote_control;
+    read_data(remote_control._program_state._program_code, "data/day15/problem2/input.txt");
+    remote_control.run_program(false);
+    std::cout << "Result : " << get_duration_for_oxygen_dissipation(remote_control.oxygen_position, remote_control._position_types) << std::endl;
   }
 
 } // namespace day1
