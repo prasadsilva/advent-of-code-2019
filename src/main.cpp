@@ -24,6 +24,7 @@ DECLARE_DAY(12);
 DECLARE_DAY(13);
 DECLARE_DAY(14);
 DECLARE_DAY(15);
+DECLARE_DAY(16);
 
 void run_problem(int day, int problem, const std::function<void(void)>& logic) {
   std::cout << "Day " << day << " - Problem " << problem << std::endl;
@@ -48,6 +49,7 @@ int main(int argc, char const *argv[]) {
     {day13::problem1,  day13::problem2},
     {day14::problem1,  day14::problem2},
     {day15::problem1,  day15::problem2},
+    {day16::problem1,  day16::problem2},
   };
 
   if (argc > 3) {
