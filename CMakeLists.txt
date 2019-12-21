@@ -23,4 +23,6 @@ add_executable(advent_of_code_2019
         src/day15.cpp
         src/day16.cpp
         src/day17.cpp
+        src/day18.cpp
+        src/day19.cpp
         src/main.cpp)
